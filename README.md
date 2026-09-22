@@ -188,7 +188,7 @@ dist/WeCom Context_1.0.0_aarch64.dmg
 dist/WeCom Context_<version>_aarch64.dmg
 ```
 
-**当前尚未发布可直接下载的 DMG，GitHub Releases 暂无安装包。** 可在满足下方开发环境要求后，从仓库根目录运行构建命令获取安装文件。后续发布的安装包请在 [Releases](https://github.com/inshusheia/pi-wecom-context/releases) 对应版本的 **Assets** 区域查找 `.dmg`；GitHub 的 **Download ZIP** 只包含源码，不是安装包。
+**v1.0.0 已发布，可直接下载 DMG。** 请进入 [GitHub Releases](https://github.com/inshusheia/pi-wecom-context/releases/tag/v1.0.0)，在 **Assets** 区域下载 `WeCom Context_1.0.0_aarch64.dmg`；GitHub 的 **Download ZIP** 只包含源码，不是安装包。
 
 ## 构建 macOS 应用
 
