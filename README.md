@@ -174,6 +174,22 @@ sidecar/.venv/bin/pip install -r sidecar/requirements.txt
 sidecar/.venv/bin/python -m unittest discover -s sidecar/tests -p 'test_*.py'
 ```
 
+## DMG 安装文件在哪里
+
+DMG 不提交到 Git 仓库，也不会混入源码目录。执行发布构建后，安装文件位于仓库根目录的：
+
+```text
+dist/WeCom Context_1.0.0_aarch64.dmg
+```
+
+版本升级后，文件名中的 `1.0.0` 会替换为应用版本号。脚本的通用输出规则为：
+
+```text
+dist/WeCom Context_<version>_aarch64.dmg
+```
+
+**当前尚未发布可直接下载的 DMG，GitHub Releases 暂无安装包。** 可在满足下方开发环境要求后，从仓库根目录运行构建命令获取安装文件。后续发布的安装包请在 [Releases](https://github.com/inshusheia/pi-wecom-context/releases) 对应版本的 **Assets** 区域查找 `.dmg`；GitHub 的 **Download ZIP** 只包含源码，不是安装包。
+
 ## 构建 macOS 应用
 
 发布脚本会从本机暂存 Pi Runtime、Pi Connector、Sidecar 和 Vault 资源；这些生成目录不纳入版本库：
@@ -182,7 +198,9 @@ sidecar/.venv/bin/python -m unittest discover -s sidecar/tests -p 'test_*.py'
 python3 scripts/build_release.py
 ```
 
-构建产物位于 `dist/`。发布前请确认没有把 API Key、企业微信密钥、快照、聊天记录、图片或本机配置加入提交。
+构建完成后，脚本会生成并校验 `dist/WeCom Context_1.0.0_aarch64.dmg`。双击该文件后，将 `WeCom Context.app` 拖入 `/Applications`；首次启动时按 macOS 提示授予所需的辅助功能、自动化或完全磁盘访问权限。
+
+发布前请确认没有把 API Key、企业微信密钥、快照、聊天记录、图片或本机配置加入提交。
 
 ## 许可
 
