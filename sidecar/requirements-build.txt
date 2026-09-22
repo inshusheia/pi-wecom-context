@@ -1,0 +1,4 @@
+-r requirements.txt
+pyinstaller==6.16.0
+
+frida==17.18.0

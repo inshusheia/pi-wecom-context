@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "wecom-context://contracts/sessions.schema.json",
+  "type": "object",
+  "properties": {
+    "count": { "type": "integer", "minimum": 0 },
+    "dataset_id": { "type": "string" },
+    "snapshot_id": { "type": "string" },
+    "snapshot_created_at": { "type": "string" },
+    "sessions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "session_key": { "type": "string", "minLength": 1 },
+          "conversation_id": { "type": "string", "minLength": 1 },
+          "display_name": { "type": "string", "minLength": 1, "maxLength": 120 },
+          "kind": { "type": "string", "minLength": 1 },
+          "last_message_time": { "type": ["string", "null"] },
+          "dataset_id": { "type": "string" },
+          "snapshot_id": { "type": "string" },
+          "selected": { "type": "boolean" }
+        },
+        "required": ["session_key", "conversation_id", "display_name", "kind", "last_message_time", "selected"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["count", "sessions"],
+  "additionalProperties": false
+}

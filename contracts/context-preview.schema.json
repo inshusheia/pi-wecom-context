@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "wecom-context://contracts/context-preview.schema.json",
+  "type": "object",
+  "properties": {
+    "session_name": { "type": "string" },
+    "snapshot_created_at": { "type": "string" },
+    "snapshot_age_minutes": { "type": "number", "minimum": 0 },
+    "original_message_count": { "type": "integer", "minimum": 0 },
+    "retained_message_count": { "type": "integer", "minimum": 0 },
+    "message_count": { "type": "integer", "minimum": 0 },
+    "estimated_tokens": { "type": "integer", "minimum": 0 },
+    "truncated": { "type": "boolean" },
+    "stale": { "type": "boolean" },
+    "redactions": {
+      "type": "object",
+      "properties": {
+        "email": { "type": "integer", "minimum": 0 },
+        "credential": { "type": "integer", "minimum": 0 },
+        "control": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["email", "credential", "control"],
+      "additionalProperties": false
+    },
+    "history_snapshot_id": { "type": "string" },
+    "read_only_history": { "type": "boolean" }
+  },
+  "required": ["session_name", "snapshot_created_at", "snapshot_age_minutes", "original_message_count", "retained_message_count", "estimated_tokens", "truncated", "stale", "redactions"],
+  "additionalProperties": false
+}

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "wecom-context://contracts/bind-session.schema.json",
+  "title": "WeCom Context Session Binding Data",
+  "type": "object",
+  "properties": {
+    "bound": { "const": true },
+    "selected": { "type": "boolean" },
+    "session_key": { "type": "string", "minLength": 1 },
+    "conversation_id": { "type": "string", "minLength": 1 },
+    "dataset_id": { "type": "string", "minLength": 1 },
+    "snapshot_id": { "type": "string", "minLength": 1 },
+    "mode": { "enum": ["active", "history"] },
+    "recovered": { "enum": ["none", "rebuilt_mapping", "from_conversation_id", "history_snapshot"] },
+    "history_snapshot_id": { "type": ["string", "null"] },
+    "history_created_at": { "type": ["string", "null"] }
+  },
+  "required": ["bound", "session_key", "conversation_id", "dataset_id", "snapshot_id", "mode", "recovered", "history_snapshot_id", "history_created_at"],
+  "additionalProperties": false
+}

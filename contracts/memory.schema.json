@@ -1,0 +1,227 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "wecom-context://contracts/memory.schema.json",
+  "title": "WeCom Context Agent Memory Views",
+  "description": "记忆查询与清空的返回载荷，按 view 判别：context = 当前有效上下文（模型真正还在用的内容）；history = 本代完整会话记录（含已移出有效上下文与被压缩的部分）；injections = 已注入的企微资料清单；clear = 清空结果。三者不可互相冒充：已压缩/已移出的内容不得显示成仍有效，摘要不得显示成模型仍拥有原图。",
+  "oneOf": [
+    { "$ref": "#/$defs/contextView" },
+    { "$ref": "#/$defs/historyView" },
+    { "$ref": "#/$defs/injectionsView" },
+    { "$ref": "#/$defs/clearResult" }
+  ],
+  "$defs": {
+    "imageRef": {
+      "type": "object",
+      "properties": {
+        "image_id": { "type": "string", "minLength": 1 },
+        "status": { "enum": ["original", "thumbnail", "missing", "unsupported", "too_large", "failed"] },
+        "mime_type": { "type": ["string", "null"] },
+        "bytes": { "type": ["integer", "null"], "minimum": 0 }
+      },
+      "required": ["image_id", "status", "mime_type", "bytes"],
+      "additionalProperties": false
+    },
+    "contextMessage": {
+      "type": "object",
+      "properties": {
+        "index": { "type": "integer", "minimum": 0 },
+        "role": { "enum": ["user", "assistant", "system"] },
+        "text": { "type": "string" },
+        "ts": { "type": "integer", "minimum": 0 },
+        "images": { "type": "array", "items": { "$ref": "#/$defs/imageRef" } }
+      },
+      "required": ["index", "role", "text", "ts", "images"],
+      "additionalProperties": false
+    },
+    "contextView": {
+      "type": "object",
+      "description": "有效上下文来自运行时查询（get_messages / get_entries / get_session_stats），不得由前端推算。context_tokens 等为 null 表示运行时未提供统计，不得伪造精确值。",
+      "properties": {
+        "view": { "const": "context" },
+        "memory_epoch": { "type": "integer", "minimum": 1 },
+        "state": { "enum": ["stopped", "starting", "idle", "preparing", "generating", "clearing", "failed"] },
+        "model": { "type": ["string", "null"] },
+        "thinking": { "type": "string" },
+        "streaming": { "type": "boolean" },
+        "system_prompt": { "type": "string" },
+        "system_prompt_chars": { "type": "integer", "minimum": 0 },
+        "context_tokens": { "type": ["integer", "null"], "minimum": 0 },
+        "context_percent": { "type": ["number", "null"], "minimum": 0 },
+        "context_window": { "type": ["integer", "null"], "minimum": 1 },
+        "messages": { "type": "array", "items": { "$ref": "#/$defs/contextMessage" } },
+        "compactions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "ts": { "type": "integer", "minimum": 0 },
+              "summary": { "type": "string" },
+              "tokens_after": { "type": ["integer", "null"], "minimum": 0 }
+            },
+            "required": ["ts", "summary", "tokens_after"],
+            "additionalProperties": false
+          }
+        },
+        "images_in_context": { "type": "integer", "minimum": 0 },
+        "updated_at": { "type": "string" }
+      },
+      "required": [
+        "view",
+        "memory_epoch",
+        "state",
+        "model",
+        "thinking",
+        "streaming",
+        "system_prompt",
+        "system_prompt_chars",
+        "context_tokens",
+        "context_percent",
+        "context_window",
+        "messages",
+        "compactions",
+        "images_in_context",
+        "updated_at"
+      ],
+      "additionalProperties": false
+    },
+    "historyView": {
+      "type": "object",
+      "description": "完整历史：state 标明该轮交互是否完成；in_effective_context=false 表示已不在有效上下文中（可能已被压缩）；summarized=true 表示只剩摘要，原图不再有效。",
+      "properties": {
+        "view": { "const": "history" },
+        "memory_epoch": { "type": "integer", "minimum": 1 },
+        "total": { "type": "integer", "minimum": 0 },
+        "offset": { "type": "integer", "minimum": 0 },
+        "limit": { "type": "integer", "minimum": 1 },
+        "has_more": { "type": "boolean" },
+        "messages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "index": { "type": "integer", "minimum": 0 },
+              "role": { "enum": ["user", "assistant", "system"] },
+              "text": { "type": "string" },
+              "ts": { "type": "integer", "minimum": 0 },
+              "state": { "enum": ["complete", "incomplete", "failed", "cancelled"] },
+              "images": { "type": "array", "items": { "$ref": "#/$defs/imageRef" } },
+              "in_effective_context": { "type": "boolean" },
+              "summarized": { "type": "boolean" }
+            },
+            "required": ["index", "role", "text", "ts", "state", "images", "in_effective_context", "summarized"],
+            "additionalProperties": false
+          }
+        },
+        "updated_at": { "type": "string" }
+      },
+      "required": ["view", "memory_epoch", "total", "offset", "limit", "has_more", "messages", "updated_at"],
+      "additionalProperties": false
+    },
+    "injectionsView": {
+      "type": "object",
+      "description": "已注入资料清单。effectiveness：active = 原文仍可能在有效上下文；summarized = 只剩摘要（原图不再有效）；evicted = 已移出有效上下文；unknown = 无法可靠判定（必须如实显示，不得假定仍被记住）。",
+      "properties": {
+        "view": { "const": "injections" },
+        "memory_epoch": { "type": "integer", "minimum": 1 },
+        "total": { "type": "integer", "minimum": 0 },
+        "offset": { "type": "integer", "minimum": 0 },
+        "limit": { "type": "integer", "minimum": 1 },
+        "has_more": { "type": "boolean" },
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "request_id": { "type": "string", "minLength": 1 },
+              "at": { "type": "string", "minLength": 1 },
+              "question": { "type": "string" },
+              "package_id": { "type": ["string", "null"] },
+              "sources": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "source_id": { "type": "string", "minLength": 1 },
+                    "dataset_id": { "type": "string", "minLength": 1 },
+                    "session_key": { "type": "string", "minLength": 1 },
+                    "display_name": { "type": "string" },
+                    "kind": { "enum": ["单聊", "群聊"] },
+                    "snapshot_id": { "type": "string", "minLength": 1 },
+                    "snapshot_created_at": { "type": "string" },
+                    "message_count": { "type": "integer", "minimum": 0 },
+                    "image_count": { "type": "integer", "minimum": 0 }
+                  },
+                  "required": [
+                    "source_id",
+                    "dataset_id",
+                    "session_key",
+                    "display_name",
+                    "kind",
+                    "snapshot_id",
+                    "snapshot_created_at",
+                    "message_count",
+                    "image_count"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "retained": {
+                "type": "object",
+                "properties": {
+                  "message_count": { "type": "integer", "minimum": 0 },
+                  "image_count": { "type": "integer", "minimum": 0 }
+                },
+                "required": ["message_count", "image_count"],
+                "additionalProperties": false
+              },
+              "effectiveness": { "enum": ["active", "summarized", "evicted", "unknown"] }
+            },
+            "required": ["request_id", "at", "question", "package_id", "sources", "retained", "effectiveness"],
+            "additionalProperties": false
+          }
+        },
+        "updated_at": { "type": "string" }
+      },
+      "required": ["view", "memory_epoch", "total", "offset", "limit", "has_more", "entries", "updated_at"],
+      "additionalProperties": false
+    },
+    "clearResult": {
+      "type": "object",
+      "description": "清空结果。removed 记录实际删除量；kept 必须为 true，表示企微源数据、快照、密钥、模型配置与旧版归档未被清空。cleared=false 时不得宣称成功。",
+      "properties": {
+        "view": { "const": "clear" },
+        "cleared": { "type": "boolean" },
+        "previous_epoch": { "type": "integer", "minimum": 1 },
+        "memory_epoch": { "type": "integer", "minimum": 1 },
+        "removed": {
+          "type": "object",
+          "properties": {
+            "session": { "type": "boolean" },
+            "messages": { "type": "integer", "minimum": 0 },
+            "injections": { "type": "integer", "minimum": 0 },
+            "packages": { "type": "integer", "minimum": 0 },
+            "images": { "type": "integer", "minimum": 0 }
+          },
+          "required": ["session", "messages", "injections", "packages", "images"],
+          "additionalProperties": false
+        },
+        "kept": {
+          "type": "object",
+          "properties": {
+            "datasets": { "const": true },
+            "snapshots": { "const": true },
+            "keys": { "const": true },
+            "providers": { "const": true },
+            "legacy_archive": { "const": true }
+          },
+          "required": ["datasets", "snapshots", "keys", "providers", "legacy_archive"],
+          "additionalProperties": false
+        },
+        "started_at": { "type": "string" },
+        "finished_at": { "type": "string" }
+      },
+      "required": ["view", "cleared", "previous_epoch", "memory_epoch", "removed", "kept", "started_at", "finished_at"],
+      "additionalProperties": false
+    }
+  }
+}

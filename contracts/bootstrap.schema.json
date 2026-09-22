@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "wecom-context://contracts/bootstrap.schema.json",
+  "title": "WeCom Context Bootstrap Data",
+  "$defs": {
+    "accountIdentity": {
+      "type": "object",
+      "properties": {
+        "account_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "account_name": { "type": "string", "maxLength": 128 },
+        "dataset_id": { "type": "string", "minLength": 1 },
+        "recent_write_minutes": { "type": ["number", "null"], "minimum": 0 },
+        "confidence": { "enum": ["live", "cached", "selected"] }
+      },
+      "required": ["account_id", "account_name", "dataset_id"],
+      "additionalProperties": true
+    },
+    "accountSummary": {
+      "type": "object",
+      "properties": {
+        "account_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "account_name": { "type": "string", "maxLength": 128 },
+        "dataset_id": { "type": "string", "minLength": 1 },
+        "recent_write_minutes": { "type": ["number", "null"], "minimum": 0 },
+        "confidence": { "enum": ["live", "cached", "selected"] },
+        "dataset_count": { "type": "integer", "minimum": 0 },
+        "database_count": { "type": "integer", "minimum": 0 },
+        "key_available": { "type": "boolean" },
+        "current": { "type": "boolean" }
+      },
+      "required": ["account_id", "account_name", "dataset_id", "dataset_count", "database_count", "key_available", "current"],
+      "additionalProperties": false
+    }
+  },
+  "type": "object",
+  "properties": {
+    "readiness": { "enum": ["ready", "needs_dataset", "needs_key", "refresh_failed"] },
+    "dataset": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "properties": {
+            "dataset_id": { "type": "string", "minLength": 1 },
+            "account_id": { "type": "string", "pattern": "^[0-9]{15,}$" },
+            "company_name": { "type": "string", "maxLength": 128 },
+            "display_name": { "type": "string", "minLength": 1 },
+            "kind": { "enum": ["current", "backup", "unknown"] },
+            "key_available": { "type": "boolean" },
+            "active": { "type": "boolean" }
+          },
+          "required": ["dataset_id", "account_id", "company_name", "display_name", "kind", "key_available", "active"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "snapshot": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "properties": {
+            "snapshot_id": { "type": "string", "minLength": 1 },
+            "created_at": { "type": "string" },
+            "age_minutes": { "type": "number", "minimum": 0 },
+            "refreshed": { "type": "boolean" },
+            "degraded": { "type": "boolean" }
+          },
+          "required": ["snapshot_id", "created_at", "age_minutes", "refreshed", "degraded"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "sessions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "session_key": { "type": "string", "minLength": 1 },
+          "conversation_id": { "type": "string", "minLength": 1 },
+          "display_name": { "type": "string", "minLength": 1, "maxLength": 120 },
+          "kind": { "type": "string", "minLength": 1 },
+          "last_message_time": { "type": ["string", "null"] },
+          "dataset_id": { "type": "string", "minLength": 1 },
+          "snapshot_id": { "type": "string", "minLength": 1 }
+        },
+        "required": ["session_key", "conversation_id", "display_name", "kind", "last_message_time", "dataset_id", "snapshot_id"],
+        "additionalProperties": false
+      }
+    },
+    "selection_reason": { "enum": ["kept", "auto_adopted", "single_dataset", "ambiguous", "none"] },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "string", "minLength": 1 },
+          "message": { "type": "string", "minLength": 1 }
+        },
+        "required": ["code", "message"],
+        "additionalProperties": false
+      }
+    },
+    "current_account": { "anyOf": [{ "$ref": "#/$defs/accountIdentity" }, { "type": "null" }] },
+    "selected_account": { "anyOf": [{ "$ref": "#/$defs/accountSummary" }, { "type": "null" }] }
+  },
+  "required": ["readiness", "dataset", "snapshot", "sessions", "selection_reason", "warnings", "current_account", "selected_account"],
+  "additionalProperties": false
+}

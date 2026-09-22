@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "wecom-context://contracts/status.schema.json",
+  "type": "object",
+  "properties": {
+    "dataset": {
+      "type": "object",
+      "properties": {
+        "available": { "type": "boolean" },
+        "database_count": { "type": "integer", "minimum": 0 },
+        "encrypted_database_count": { "type": "integer", "minimum": 0 },
+        "scan_deferred": { "type": "boolean" }
+      },
+      "required": ["available", "database_count", "encrypted_database_count"],
+      "additionalProperties": false
+    },
+    "key": {
+      "type": "object",
+      "properties": {
+        "available": { "type": "boolean" },
+        "validated_database_count": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["available", "validated_database_count"],
+      "additionalProperties": false
+    },
+    "allow_send_to_wecom": { "type": "boolean" },
+    "snapshot": {
+      "type": "object",
+      "properties": {
+        "available": { "type": "boolean" },
+        "created_at": { "type": ["string", "null"] },
+        "age_minutes": { "type": ["number", "null"], "minimum": 0 },
+        "active": { "type": "boolean" }
+      },
+      "required": ["available", "created_at", "age_minutes", "active"],
+      "additionalProperties": false
+    },
+    "selected_session": {
+      "type": "object",
+      "properties": {
+        "available": { "type": "boolean" },
+        "display_name": { "type": ["string", "null"] },
+        "kind": { "type": ["string", "null"] }
+      },
+      "required": ["available", "display_name", "kind"],
+      "additionalProperties": false
+    },
+    "dataset_selection_required": { "type": "boolean" }
+  },
+  "required": ["dataset", "key", "snapshot", "selected_session", "dataset_selection_required"],
+  "additionalProperties": false
+}

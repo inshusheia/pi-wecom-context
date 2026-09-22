@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "wecom-context://contracts/remove-dataset.schema.json",
+  "title": "Remove / Restore Dataset Result",
+  "type": "object",
+  "properties": {
+    "removed": {
+      "type": "boolean"
+    },
+    "restored": {
+      "type": "boolean"
+    },
+    "dataset_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "deleted_snapshots": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "deleted_keys": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "removed_agents": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "selected_dataset_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "datasets": {
+      "type": "array"
+    },
+    "ignored": {
+      "type": "array"
+    }
+  },
+  "required": [
+    "dataset_id",
+    "count",
+    "datasets"
+  ],
+  "additionalProperties": false
+}

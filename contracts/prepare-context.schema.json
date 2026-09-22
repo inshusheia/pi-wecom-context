@@ -1,0 +1,204 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "wecom-context://contracts/prepare-context.schema.json",
+  "title": "WeCom Context Multi-Source Package (prepare_context)",
+  "description": "本轮不可变图文资料包：用户所选企微会话的脱敏文字与可用图片。images 数组顺序即模型输入顺序，text 用「【图片 N】」引用第 N 张。data 为 prepare_context 返回，$defs.prepareRequest 为其请求体。资料包一旦生成即固定内容，禁止「预览 A、实际发送 B」。",
+  "type": "object",
+  "properties": {
+    "package_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "created_at": { "type": "string", "minLength": 1 },
+    "dir": {
+      "type": "string",
+      "minLength": 1,
+      "description": "资料包目录（sidecar 拥有）。可用图片位于该目录下，Rust 只读该目录内的文件，不接受前端传入的任意路径。"
+    },
+    "text": {
+      "type": "string",
+      "description": "已脱敏、已按预算裁剪的引用数据正文（含来源标注与「【图片 N】」编号）。Rust 直接作为 prompt 的引用部分，不重新渲染。"
+    },
+    "sources": { "type": "array", "items": { "$ref": "#/$defs/source" } },
+    "messages": { "type": "array", "items": { "$ref": "#/$defs/message" } },
+    "images": { "type": "array", "items": { "$ref": "#/$defs/image" } },
+    "warnings": { "type": "array", "items": { "$ref": "#/$defs/warning" } },
+    "stats": { "$ref": "#/$defs/stats" }
+  },
+  "required": ["package_id", "created_at", "dir", "text", "sources", "messages", "images", "warnings", "stats"],
+  "additionalProperties": false,
+  "$defs": {
+    "prepareRequest": {
+      "type": "object",
+      "description": "显式来源集合：每个来源自带企业与快照身份，读多来源不得依赖也不得改写全局「当前企业」。",
+      "properties": {
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 20,
+          "items": {
+            "type": "object",
+            "properties": {
+              "dataset_id": { "type": "string", "minLength": 1 },
+              "snapshot_id": { "type": "string", "minLength": 1 },
+              "session_key": { "type": "string", "pattern": "^[0-9a-f]{16}$" },
+              "limit": { "type": "integer", "minimum": 1, "maximum": 500 },
+              "start": { "type": "string", "minLength": 1, "maxLength": 64 },
+              "end": { "type": "string", "minLength": 1, "maxLength": 64 },
+              "include_images": { "type": "boolean" }
+            },
+            "required": ["dataset_id", "snapshot_id", "session_key"],
+            "additionalProperties": false
+          }
+        },
+        "image_options": {
+          "type": "object",
+          "properties": {
+            "max_images": { "type": "integer", "minimum": 0, "maximum": 32 },
+            "max_total_bytes": { "type": "integer", "minimum": 0 },
+            "max_edge_pixels": { "type": "integer", "minimum": 64 }
+          },
+          "additionalProperties": false
+        },
+        "max_context_tokens": { "type": "integer", "minimum": 100, "maximum": 60000 },
+        "max_message_characters": { "type": "integer", "minimum": 50, "maximum": 8000 }
+      },
+      "required": ["sources"],
+      "additionalProperties": false
+    },
+    "source": {
+      "type": "object",
+      "description": "一个来源 = 一个企微会话在某个企业某个快照下的读取结果。source_id 为 <dataset_id>:<session_key>。",
+      "properties": {
+        "source_id": { "type": "string", "minLength": 1 },
+        "dataset_id": { "type": "string", "minLength": 1 },
+        "snapshot_id": { "type": "string", "minLength": 1 },
+        "session_key": { "type": "string", "minLength": 1 },
+        "conversation_id": { "type": "string", "minLength": 1 },
+        "display_name": { "type": "string" },
+        "kind": { "enum": ["单聊", "群聊"] },
+        "snapshot_created_at": { "type": "string" },
+        "snapshot_age_minutes": { "type": "number", "minimum": 0 },
+        "stale": { "type": "boolean" },
+        "read_only_history": { "type": "boolean" },
+        "original_message_count": { "type": "integer", "minimum": 0 },
+        "retained_message_count": { "type": "integer", "minimum": 0 },
+        "image_count": { "type": "integer", "minimum": 0 },
+        "omitted_image_count": { "type": "integer", "minimum": 0 },
+        "estimated_tokens": { "type": "integer", "minimum": 0 },
+        "truncated": { "type": "boolean" },
+        "redactions": {
+          "type": "object",
+          "properties": {
+            "email": { "type": "integer", "minimum": 0 },
+            "credential": { "type": "integer", "minimum": 0 },
+            "control": { "type": "integer", "minimum": 0 }
+          },
+          "required": ["email", "credential", "control"],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "source_id",
+        "dataset_id",
+        "snapshot_id",
+        "session_key",
+        "conversation_id",
+        "display_name",
+        "kind",
+        "snapshot_created_at",
+        "snapshot_age_minutes",
+        "stale",
+        "read_only_history",
+        "original_message_count",
+        "retained_message_count",
+        "image_count",
+        "omitted_image_count",
+        "estimated_tokens",
+        "truncated",
+        "redactions"
+      ],
+      "additionalProperties": false
+    },
+    "message": {
+      "type": "object",
+      "description": "保留的消息。message_id + send_time 构成稳定身份：预算裁剪后仍必须能判断保留的文字对应哪些图片，因此这两个字段不得在裁剪时丢弃。",
+      "properties": {
+        "message_id": { "type": "string", "minLength": 1 },
+        "source_id": { "type": "string", "minLength": 1 },
+        "time": { "type": "string" },
+        "send_time": { "type": "integer", "minimum": 0 },
+        "sender": { "type": "string" },
+        "content_type": { "type": "integer" },
+        "type_name": { "type": "string" },
+        "content": { "type": "string" },
+        "image_ids": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "truncated": { "type": "boolean" }
+      },
+      "required": ["message_id", "source_id", "time", "send_time", "sender", "content_type", "type_name", "content", "image_ids", "truncated"],
+      "additionalProperties": false
+    },
+    "image": {
+      "type": "object",
+      "description": "可用图片必须带 path/mime_type/sha256/bytes；不可用图片必须给出 reason 且不得带 path，禁止用占位图冒充已读取。",
+      "properties": {
+        "image_id": { "type": "string", "minLength": 1 },
+        "source_id": { "type": "string", "minLength": 1 },
+        "message_id": { "type": "string", "minLength": 1 },
+        "status": { "enum": ["original", "thumbnail", "missing", "unsupported", "too_large", "failed"] },
+        "reason": { "type": ["string", "null"] },
+        "path": { "type": ["string", "null"] },
+        "mime_type": { "type": ["string", "null"] },
+        "sha256": { "type": ["string", "null"] },
+        "bytes": { "type": ["integer", "null"], "minimum": 0 },
+        "width": { "type": ["integer", "null"], "minimum": 1 },
+        "height": { "type": ["integer", "null"], "minimum": 1 },
+        "estimated_tokens": { "type": ["integer", "null"], "minimum": 0 }
+      },
+      "required": ["image_id", "source_id", "message_id", "status", "reason", "path", "mime_type", "sha256", "bytes", "width", "height", "estimated_tokens"],
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "enum": ["original", "thumbnail"] } }, "required": ["status"] },
+          "then": {
+            "properties": {
+              "path": { "type": "string", "minLength": 1 },
+              "mime_type": { "type": "string", "pattern": "^image/" },
+              "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+              "bytes": { "type": "integer", "minimum": 1 }
+            }
+          },
+          "else": {
+            "properties": {
+              "path": { "type": "null" },
+              "sha256": { "type": "null" },
+              "reason": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "warning": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "message": { "type": "string", "minLength": 1 },
+        "source_id": { "type": ["string", "null"] },
+        "image_id": { "type": ["string", "null"] }
+      },
+      "required": ["code", "message", "source_id", "image_id"],
+      "additionalProperties": false
+    },
+    "stats": {
+      "type": "object",
+      "properties": {
+        "source_count": { "type": "integer", "minimum": 1 },
+        "message_count": { "type": "integer", "minimum": 0 },
+        "image_count": { "type": "integer", "minimum": 0 },
+        "omitted_image_count": { "type": "integer", "minimum": 0 },
+        "image_bytes": { "type": "integer", "minimum": 0 },
+        "estimated_tokens": { "type": "integer", "minimum": 0 },
+        "truncated": { "type": "boolean" }
+      },
+      "required": ["source_count", "message_count", "image_count", "omitted_image_count", "image_bytes", "estimated_tokens", "truncated"],
+      "additionalProperties": false
+    }
+  }
+}

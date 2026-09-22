@@ -1,0 +1,1 @@
+{"main-window":{"identifier":"main-window","description":"Minimal local capabilities for the WeCom Context window","local":true,"windows":["main"],"permissions":["core:default"]}}

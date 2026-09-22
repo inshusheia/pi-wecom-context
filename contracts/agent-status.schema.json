@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "wecom-context://contracts/agent-status.schema.json",
+  "title": "WeCom Context Single Agent Runtime Status (agent_status)",
+  "description": "唯一主 Agent 的运行状态。state 是唯一权威运行态；memory_epoch 与 run_id 用于丢弃迟到事件（清空或重启后旧事件不得写回会话）。unfinished_clear_epoch 非空表示上次清空未完成，下次启动必须继续完成清空。",
+  "type": "object",
+  "properties": {
+    "state": {
+      "enum": ["stopped", "starting", "idle", "preparing", "generating", "clearing", "failed"],
+      "description": "preparing = 正在生成资料包；generating = 模型正在生成；clearing = 正在清空记忆，此时禁止发送"
+    },
+    "memory_epoch": { "type": "integer", "minimum": 1 },
+    "run_id": { "type": ["string", "null"] },
+    "request_id": { "type": ["string", "null"] },
+    "package_id": { "type": ["string", "null"] },
+    "model": { "type": ["string", "null"] },
+    "thinking": { "type": "string", "minLength": 1 },
+    "pi_pid": { "type": ["integer", "null"], "minimum": 1 },
+    "session_ready": { "type": "boolean" },
+    "started_at": { "type": ["string", "null"] },
+    "last_event_at": { "type": ["string", "null"] },
+    "unfinished_clear_epoch": { "type": ["integer", "null"], "minimum": 1 },
+    "last_error": {
+      "type": ["object", "null"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "message": { "type": "string" }
+      },
+      "required": ["code", "message"],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "state",
+    "memory_epoch",
+    "run_id",
+    "request_id",
+    "package_id",
+    "model",
+    "thinking",
+    "pi_pid",
+    "session_ready",
+    "started_at",
+    "last_event_at",
+    "unfinished_clear_epoch",
+    "last_error"
+  ],
+  "additionalProperties": false
+}

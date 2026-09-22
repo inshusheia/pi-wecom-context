@@ -1,0 +1,20 @@
+{
+  "name": "@yangsiyu/wecom-context-desktop",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "icons": "tauri icon src-tauri/app-icon.svg",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.8.0"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.11.4",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.4"
+  }
+}

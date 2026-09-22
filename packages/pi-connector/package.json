@@ -1,0 +1,22 @@
+{
+  "name": "@yangsiyu/pi-wecom-context-connector",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./index.ts",
+  "pi": {
+    "extensions": ["./index.ts"]
+  },
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": ">=0.85.1",
+    "typebox": "1.3.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.0",
+    "typescript": "5.9.3"
+  }
+}

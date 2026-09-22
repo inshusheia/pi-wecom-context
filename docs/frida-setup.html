@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Frida 安装与取钥步骤</title>
+  <style>
+    :root { color-scheme: light; --ink:#182230; --muted:#5f6b7a; --line:#dfe5ec; --blue:#1769e0; --bg:#f5f7fa; --card:#fff; --green:#087443; }
+    * { box-sizing: border-box; }
+    body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.7 -apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC",sans-serif; }
+    main { max-width:860px; margin:0 auto; padding:48px 28px 64px; }
+    h1 { margin:0 0 8px; font-size:32px; letter-spacing:-.02em; }
+    h2 { margin:32px 0 12px; font-size:21px; }
+    p { margin:8px 0; }
+    .lead { color:var(--muted); margin-bottom:24px; }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:22px 24px; margin:16px 0; box-shadow:0 8px 24px rgba(25,45,75,.05); }
+    .ok { border-left:5px solid var(--green); }
+    .warn { border-left:5px solid #c47700; }
+    .label { display:inline-block; color:var(--green); font-weight:700; margin-bottom:4px; }
+    ol { padding-left:24px; }
+    li { margin:10px 0; }
+    code { background:#eef2f7; border-radius:5px; padding:2px 6px; font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace; }
+    pre { overflow:auto; margin:10px 0 0; padding:14px 16px; background:#17202b; color:#f4f7fb; border-radius:10px; font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace; }
+    .small { color:var(--muted); font-size:14px; }
+    a { color:var(--blue); }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Frida 安装与取钥步骤</h1>
+    <p class="lead">WeCom Context 离线随附说明 · 版本 1.0.0 · Frida 17.18.0</p>
+
+    <section class="card ok">
+      <span class="label">普通用户无需手动安装</span>
+      <p>DMG 内的 <strong>WeCom Context.app</strong> 已经内置 Frida 及 arm64 原生模块。直接把 App 拖入“应用程序”并启动即可，不需要安装 Python、pip 或 Frida。</p>
+    </section>
+
+    <h2>只有在源码调试或修复旧安装包时才需要安装</h2>
+    <section class="card">
+      <ol>
+        <li>打开“终端”，进入项目的 <code>source</code> 目录：</li>
+      </ol>
+      <pre>cd ~/Desktop/pi-wecom-context/source</pre>
+      <ol start="2">
+        <li>让项目脚本自动安装适用于 Apple Silicon 的 Frida：</li>
+      </ol>
+      <pre>sidecar/.venv/bin/python scripts/capture_enterprise_key.py</pre>
+      <p class="small">脚本会通过本机代理 <code>http://127.0.0.1:7897</code> 从 PyPI 下载 arm64 abi3 wheel，并安装到项目虚拟环境。没有代理时，请先配置可访问 PyPI 的网络。</p>
+      <ol start="3">
+        <li>检查安装结果：</li>
+      </ol>
+      <pre>sidecar/.venv/bin/python -c 'import frida; print(frida.__version__)'</pre>
+      <p>预期输出：<code>17.18.0</code> 或项目要求的兼容版本。</p>
+    </section>
+
+    <h2>提取企业微信数据库密钥</h2>
+    <section class="card">
+      <ol>
+        <li>启动企业微信，并确认当前登录账户属于要读取的目标企业。</li>
+        <li>确认目标企业的数据目录已经重新生成。</li>
+        <li>运行脚本，按提示选择数据集：</li>
+      </ol>
+      <pre>sidecar/.venv/bin/python scripts/capture_enterprise_key.py</pre>
+      <p>脚本只读附加企业微信进程并扫描密钥，不上传聊天内容。密钥验证成功后才会写入本机 vault。</p>
+    </section>
+
+    <section class="card warn">
+      <strong>仍然看到 CAPTURE_FAILED / No module named 'frida'？</strong>
+      <p>如果使用的是安装版，请退出旧版 WeCom Context，重新从本 DMG 安装最新版；如果使用源码版，请重新执行上面的安装和版本检查命令。安装版不应要求用户自行执行 pip。</p>
+    </section>
+
+    <p class="small">本页是随 DMG 一起分发的离线说明，不依赖网络。请勿把密钥文件、企业微信数据库或聊天内容发送给他人。</p>
+  </main>
+</body>
+</html>

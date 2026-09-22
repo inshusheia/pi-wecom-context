@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" gradientUnits="userSpaceOnUse" x1="168" y1="132" x2="880" y2="948">
+      <stop offset="0" stop-color="#4387f5"/>
+      <stop offset="1" stop-color="#8c6de9"/>
+    </linearGradient>
+    <radialGradient id="gloss" gradientUnits="userSpaceOnUse" cx="512" cy="120" r="720">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.22"/>
+      <stop offset="0.55" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="shadow" gradientUnits="userSpaceOnUse" cx="512" cy="900" r="470">
+      <stop offset="0" stop-color="#0b1b3a" stop-opacity="0.30"/>
+      <stop offset="0.55" stop-color="#0b1b3a" stop-opacity="0.14"/>
+      <stop offset="1" stop-color="#0b1b3a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <ellipse cx="512" cy="900" rx="470" ry="86" fill="url(#shadow)"/>
+  <rect x="100" y="100" width="824" height="824" rx="186" fill="url(#bg)"/>
+  <rect x="100" y="100" width="824" height="824" rx="186" fill="url(#gloss)"/>
+
+  <g fill="#ffffff">
+    <rect x="268" y="272" width="488" height="372" rx="92"/>
+    <path d="M346 624H496L424 722Q404 748 384 722Z"/>
+  </g>
+
+  <path fill="url(#bg)" d="M512 340C512 425 545 458 630 458C545 458 512 491 512 576C512 491 479 458 394 458C479 458 512 425 512 340Z"/>
+</svg>

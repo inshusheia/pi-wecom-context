@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "wecom-context://contracts/refresh.schema.json",
+  "type": "object",
+  "properties": {
+    "created": { "type": "boolean" },
+    "decrypted_database_count": { "type": "integer", "minimum": 0 },
+    "failed_database_count": { "type": "integer", "minimum": 0 },
+    "active_snapshot_created_at": { "type": "string" },
+    "session_binding": { "enum": ["preserved", "cleared", "none"] },
+    "active_config_fields": { "type": "boolean" },
+    "invalidated_session_keys": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "preserved_session_keys": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "generation": {
+      "type": "object",
+      "properties": {
+        "dataset_id": { "type": "string", "minLength": 1 },
+        "snapshot_id": { "type": "string", "minLength": 1 }
+      },
+      "required": ["dataset_id", "snapshot_id"],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "created",
+    "decrypted_database_count",
+    "failed_database_count",
+    "active_snapshot_created_at",
+    "session_binding",
+    "invalidated_session_keys",
+    "preserved_session_keys",
+    "generation"
+  ],
+  "additionalProperties": false
+}

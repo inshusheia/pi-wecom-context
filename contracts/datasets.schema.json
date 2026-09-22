@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "wecom-context://contracts/datasets.schema.json",
+  "$defs": {
+    "accountIdentity": {
+      "type": "object",
+      "properties": {
+        "account_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "account_name": { "type": "string", "maxLength": 128 },
+        "dataset_id": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "recent_write_minutes": { "type": ["number", "null"], "minimum": 0 },
+        "confidence": { "enum": ["live", "cached", "selected"] }
+      },
+      "required": ["account_id", "account_name", "dataset_id"],
+      "additionalProperties": false
+    },
+    "accountSummary": {
+      "type": "object",
+      "properties": {
+        "account_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "account_name": { "type": "string", "maxLength": 128 },
+        "dataset_id": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "recent_write_minutes": { "type": ["number", "null"], "minimum": 0 },
+        "confidence": { "enum": ["live", "cached", "selected"] },
+        "dataset_count": { "type": "integer", "minimum": 0 },
+        "database_count": { "type": "integer", "minimum": 0 },
+        "key_available": { "type": "boolean" },
+        "current": { "type": "boolean" }
+      },
+      "required": ["account_id", "account_name", "dataset_id", "dataset_count", "database_count", "key_available", "current"],
+      "additionalProperties": false
+    },
+    "dataset": {
+      "type": "object",
+      "properties": {
+        "dataset_id": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "account_id": { "type": "string", "pattern": "^[0-9]{15,}$" },
+        "account_key": { "type": "string", "maxLength": 128 },
+        "account_name": { "type": "string", "maxLength": 128 },
+        "company_name": { "type": "string", "maxLength": 128 },
+        "display_name": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "database_count": { "type": "integer", "minimum": 0 },
+        "encrypted_database_count": { "type": "integer", "minimum": 0 },
+        "wal_count": { "type": "integer", "minimum": 0 },
+        "key_available": { "type": "boolean" },
+        "active": { "type": "boolean" },
+        "recent_write_minutes": { "type": ["number", "null"], "minimum": 0 }
+      },
+      "required": ["dataset_id", "account_id", "company_name", "kind", "display_name", "database_count", "encrypted_database_count", "wal_count", "key_available"],
+      "additionalProperties": false
+    }
+  },
+  "type": "object",
+  "properties": {
+    "count": { "type": "integer", "minimum": 0 },
+    "selected_dataset_id": { "type": ["string", "null"] },
+    "datasets": { "type": "array", "items": { "$ref": "#/$defs/dataset" } },
+    "ignored": { "type": "array", "items": { "$ref": "#/$defs/dataset" } },
+    "accounts": { "type": "array", "items": { "$ref": "#/$defs/accountSummary" } },
+    "current_account": { "anyOf": [{ "$ref": "#/$defs/accountIdentity" }, { "type": "null" }] },
+    "selected_account": { "anyOf": [{ "$ref": "#/$defs/accountSummary" }, { "type": "null" }] },
+    "scan_deferred": { "type": "boolean" }
+  },
+  "required": ["count", "selected_dataset_id", "datasets", "ignored", "accounts", "current_account", "selected_account"],
+  "additionalProperties": false
+}

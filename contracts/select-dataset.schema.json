@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "wecom-context://contracts/select-dataset.schema.json",
+  "type": "object",
+  "properties": {
+    "selected": { "const": true },
+    "dataset_id": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "kind": { "enum": ["current", "backup", "unknown"] },
+    "display_name": { "type": "string", "minLength": 1, "maxLength": 32 }
+  },
+  "required": ["selected", "dataset_id", "kind", "display_name"],
+  "additionalProperties": false
+}
